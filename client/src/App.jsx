@@ -11,10 +11,10 @@ export default function App() {
   const [error, setError] = useState(null);
   const abortControllerRef = useRef(null);
 
-  const handleSend = async (text) => {
+  const handleSend = async (text, images = []) => {
     setError(null);
 
-    const userMessage = { role: 'user', content: text };
+    const userMessage = { role: 'user', content: text, images };
     const assistantMessage = { role: 'assistant', content: '' };
     // Anthropic APIに送信する会話履歴(今回のユーザー発言までを含む)
     const historyToSend = [...messages, userMessage];

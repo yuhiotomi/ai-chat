@@ -10,6 +10,63 @@ const anthropic = new Anthropic({
 // 使用するAIモデル(Claude Haiku 4.5)
 const MODEL = 'claude-haiku-4-5-20251001';
 
+// 画像添付機能の制限値
+const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024; // 1枚あたり最大3MB
+const MAX_IMAGES_PER_MESSAGE = 5; // 1メッセージあたり最大5枚
+const ALLOWED_IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+
+// メッセージ1件分の images フィールドを検証する。
+// 問題なければ null、問題があればエラーメッセージ(文字列)を返す。
+function validateImages(images) {
+  if (images === undefined) return null;
+  if (!Array.isArray(images)) return 'images は配列で指定してください';
+  if (images.length > MAX_IMAGES_PER_MESSAGE) {
+    return `画像は1メッセージあたり最大${MAX_IMAGES_PER_MESSAGE}枚までです`;
+  }
+
+  for (const image of images) {
+    if (!image || typeof image.data !== 'string' || typeof image.mediaType !== 'string') {
+      return '画像データには data(Base64文字列) と mediaType が必要です';
+    }
+    if (!ALLOWED_IMAGE_MEDIA_TYPES.includes(image.mediaType)) {
+      return `対応していない画像形式です(対応形式: ${ALLOWED_IMAGE_MEDIA_TYPES.join(', ')})`;
+    }
+
+    let byteLength;
+    try {
+      byteLength = Buffer.from(image.data, 'base64').length;
+    } catch {
+      return '画像データ(Base64)の形式が不正です';
+    }
+    if (byteLength === 0 || byteLength > MAX_IMAGE_SIZE_BYTES) {
+      return `画像サイズは1枚あたり最大${MAX_IMAGE_SIZE_BYTES / (1024 * 1024)}MBまでです`;
+    }
+  }
+
+  return null;
+}
+
+// Express/フロントエンド向けのメッセージ形式を、Anthropic Messages APIの
+// content 形式(画像添付時はブロック配列)に変換する。
+function toAnthropicMessages(messages) {
+  return messages.map((m) => {
+    if (!m.images || m.images.length === 0) {
+      return { role: m.role, content: m.content };
+    }
+    const content = [];
+    if (m.content) {
+      content.push({ type: 'text', text: m.content });
+    }
+    for (const image of m.images) {
+      content.push({
+        type: 'image',
+        source: { type: 'base64', media_type: image.mediaType, data: image.data },
+      });
+    }
+    return { role: m.role, content };
+  });
+}
+
 router.post('/', async (req, res) => {
   const { messages } = req.body;
 
@@ -29,6 +86,22 @@ router.post('/', async (req, res) => {
     return;
   }
 
+  const hasEmptyMessage = messages.some(
+    (m) => m.content.trim() === '' && (!Array.isArray(m.images) || m.images.length === 0)
+  );
+  if (hasEmptyMessage) {
+    res.status(400).json({ error: 'content または images のいずれかを指定してください' });
+    return;
+  }
+
+  for (const m of messages) {
+    const imageError = validateImages(m.images);
+    if (imageError) {
+      res.status(400).json({ error: imageError });
+      return;
+    }
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     res.status(500).json({ error: 'サーバーにANTHROPIC_API_KEYが設定されていません' });
     return;
@@ -45,7 +118,7 @@ router.post('/', async (req, res) => {
     stream = anthropic.messages.stream({
       model: MODEL,
       max_tokens: 1024,
-      messages,
+      messages: toAnthropicMessages(messages),
     });
   } catch (error) {
     console.error('Anthropic APIの呼び出しに失敗しました:', error);

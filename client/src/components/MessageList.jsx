@@ -15,9 +15,23 @@ export default function MessageList({ messages }) {
           <span className="message__role">
             {message.role === 'user' ? 'あなた' : 'AI'}
           </span>
-          <p className="message__content">
-            {message.content || (message.role === 'assistant' ? '…' : '')}
-          </p>
+          {message.images && message.images.length > 0 && (
+            <div className="message__images">
+              {message.images.map((image, imageIndex) => (
+                <img
+                  key={imageIndex}
+                  className="message__image"
+                  src={`data:${image.mediaType};base64,${image.data}`}
+                  alt={image.name || `添付画像${imageIndex + 1}`}
+                />
+              ))}
+            </div>
+          )}
+          {(message.content || message.role === 'assistant') && (
+            <p className="message__content">
+              {message.content || (message.role === 'assistant' ? '…' : '')}
+            </p>
+          )}
         </div>
       ))}
     </div>

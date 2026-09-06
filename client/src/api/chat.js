@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
  * バックエンドの POST /api/chat に会話履歴を送信し、
  * SSEでストリーミングされるテキストチャンクを逐次コールバックへ渡す。
  *
- * @param {Array<{role: 'user'|'assistant', content: string}>} messages 送信する会話履歴
+ * @param {Array<{role: 'user'|'assistant', content: string, images?: Array<{data: string, mediaType: string}>}>} messages 送信する会話履歴(imagesは画像添付時のみ)
  * @param {(chunk: string) => void} onChunk テキストチャンクを受信するたびに呼ばれるコールバック
  * @param {AbortSignal} [signal] リクエストを中断するためのシグナル
  */
