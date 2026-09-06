@@ -1,0 +1,109 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  text-align: left;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.app__header h1 {
+  font-size: 28px;
+  margin: 0 0 16px;
+}
+
+.app__status {
+  font-size: 14px;
+  color: var(--text);
+  margin: 8px 0;
+}
+
+.app__error {
+  font-size: 14px;
+  color: #d92d20;
+  margin: 8px 0;
+}
+
+.message-list {
+  flex: 1;
+  min-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+
+.message-list--empty {
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.message {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.message--user {
+  align-self: flex-end;
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.message--assistant {
+  align-self: flex-start;
+}
+
+.message__role {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.message__content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-h);
+}
+
+.message-input {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.message-input input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.message-input button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.message-input button:disabled,
+.message-input input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

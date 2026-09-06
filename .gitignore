@@ -1,0 +1,24 @@
+# 依存パッケージ
+node_modules/
+
+# 環境変数(APIキー等の秘匿情報)
+.env
+.env.local
+server/.env
+server/.env.local
+
+# ビルド成果物
+dist/
+build/
+client/dist/
+
+# ログ
+*.log
+npm-debug.log*
+
+# エディタ・OS関連
+.DS_Store
+Thumbs.db
+
+# 本プロジェクトとは無関係の別プロジェクト(誤って巻き込まれないよう除外)
+/todo/
